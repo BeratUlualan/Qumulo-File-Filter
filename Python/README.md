@@ -99,10 +99,10 @@ new_files = value['new_files']
 ```
 When the **file_filter_py** script find an unauthorized file type, it moves this file into `quarantine_directory` within the file/folder hierarchy with adding a timestamp to file name. This can allow the script to move the same file name again again.
 
-The **file_filter_py** script create a log file in main directory. If you want to create logs in another directory, please edit below line. 
+The **file_filter_py** script create a log file in main directory. If you want to create logs in another directory, please edit ```filename``` parameter as shown the line below. 
 
 ```sh
-	logging.basicConfig(filename='file_filter.log', level=logging.INFO,
+logging.basicConfig(filename='file_filter.log', level=logging.INFO,
     format='%(asctime)s,%(levelname)s,%(message)s')
 ```
 	
