@@ -3,7 +3,7 @@
 This script can help Qumulo customer who wants to filter specific file types and move them a quarantine directory. It can also inform the file owner and Qumulo admins about this filtering operations via email.  
 
 ## Installation
-1. Copy **file_filter.py**, **file_types.json**,  **credentials.json**, and **cluster_credentials.json** files into a folder in a machine (Linux, MacOS, Windows) which has **Qumulo Python SDK**.if you haven't deployed it yet, please follow the additional steps section below. 
+1. Copy **file_filter.py**, **file_types.json**,  **credentials.json**, and **cluster_credentials.json** files into a folder in a machine (Linux, MacOS, Windows) which has **Qumulo Python SDK**. If you haven't deployed it yet, please follow the additional steps section below. 
 2. Edit the **cluster_credentials.json**  file with your Qumulo cluster credentials. 
 ```sh
 {
@@ -117,3 +117,62 @@ You can create your own definition by using https://crontab-generator.org/
 
 ## Consideration
 The script doesn't delete the files under `quarantine_directory`. So you need to do this manually or via another script. 
+
+## Additional Steps
+#### Qumulo Python SDK Installation 
+The Qumulo Python SDK has had support for Python 3.6+ since version 3.1.0.
+
+To install the Python 3.6 version of the Qumulo Python SDK, you can simply run the following command:
+
+```pip3 install qumulo_api==x.x.x```
+
+Replace "x.x.x" is the version of the SDK you wish to install. Qumulo recommends keeping the version of the SDK that you're using in sync with the version of your cluster.
+
+#### Encrypted Password Definitions
+You can use Fernet library to use encrypted password definitions in the json file rather than clear text. (https://cryptography.io/en/latest/fernet/)
+
+Fernet guarantees that a message encrypted using it cannot be manipulated or read without the key. Fernet is an implementation of symmetric (also known as “secret key”) authenticated cryptography. 
+
+This class provides both encryption and decryption facilities.
+```sh
+>>> from cryptography.fernet import Fernet
+>>> key = Fernet.generate_key()
+>>> f = Fernet(key)
+>>> token = f.encrypt(b"my deep dark secret")
+>>> token
+b'...'
+>>> f.decrypt(token)
+b'my deep dark secret'
+```
+You can create a **key.json** file like below to store your key for this operation.
+```{"key": "NkRz4hTFHw2otYf9xhIm41MkkjKPfQ1DaviQHkBNhAg="}```
+
+You can use Fernet as shown in lines below.
+```sh
+...
+import qumulo.lib.identity_util as id_util
+from cryptography.fernet import Fernet
+
+# Logging Details
+logging.basicConfig(filename='file_filter.log', level=logging.INFO,
+    format='%(asctime)s,%(levelname)s,%(message)s')
+    
+# Decryption
+key_json_file = open('key.json', 'r')
+key_json_data = key_json_file.read()
+key_json_object = json.loads(key_json_data)
+fernet_key = key_json_object['key'].encode()
+fernet_decryption = Fernet(fernet_key)
+....
+....
+# Parse cluster credentials
+cluster_address = cluster_json_object['cluster_name']
+port_number = cluster_json_object['port_number']
+username = cluster_json_object['cluster_username']
+encrypted_cluster_password = cluster_json_object['cluster_password'].encode()
+password = fernet_decryption.decrypt(encrypted_cluster_password).decode("utf-8")
+....
+```
+
+
+
