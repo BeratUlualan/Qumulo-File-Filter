@@ -7,10 +7,10 @@ This script can help Qumulo customer who wants to filter specific file types and
 2. Edit the **cluster_credentials.json**  file with your Qumulo cluster credentials. 
 ```sh
 {
-	"cluster_name": "CLUSTER HOSTNAME or IP ADDRESS",
+	"cluster_address": "CLUSTER HOSTNAME or IP ADDRESS",
 	"port_number": 8000,
-	"cluster_username": "USERNAME",
-	"cluster_password": "PASSWORD",
+	"username": "USERNAME",
+	"password": "PASSWORD",
 	"main_directory": "/opt/Qumulo/",
 	"quarantine_directory": "/quarantine",
 	"credentials_file": "credentials.json",
