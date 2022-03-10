@@ -16,7 +16,7 @@ logging.basicConfig(filename='file_filter.log', level=logging.INFO,
     format='%(asctime)s,%(levelname)s,%(message)s')
 
 # Read credentials
-json_file = open('credentials.json','r')
+json_file = open('config/cluster_credentials.json','r')
 json_data = json_file.read()
 cluster_json_object = json.loads(json_data)
 
@@ -41,11 +41,14 @@ smtp_server = cluster_json_object['smtp_server']
 smtp_port = cluster_json_object['smtp_port']
 domain = cluster_json_object['domain']
 mail_server = smtplib.SMTP(smtp_server, int(smtp_port))
-#mail_server.starttls()
-#email_username = cluster_json_object['email_username']
-#email_password = cluster_json_object['email_password']
+mail_server.starttls()
+email_username = cluster_json_object['email_username']
+email_password = cluster_json_object['email_password']
 #mail_server.login(email_username, email_password)
 
+c_json_file = open(credentials_file,'r')
+c_json_data = c_json_file.read()
+policy_json_object = json.loads(c_json_data)
 
 # Email Function for Sending Warning Message to The User Who Created a Banned File
 def mail_send(username, new_file_path, email_subject, email_message):
@@ -136,7 +139,7 @@ media_file_list = []
 executable_file_list = []
 custom_file_list = []
 
-with open(os.path.join("file_types.json")) as type_file:
+with open(os.path.join("config/file_types.json")) as type_file:
     file_types = json.load(type_file)
     media_file_list = file_types['media_files']
     executable_file_list = file_types['executable_files']
