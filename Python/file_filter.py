@@ -18,18 +18,18 @@ logging.basicConfig(filename='file_filter.log', level=logging.INFO,
 # Read credentials
 json_file = open('credentials.json','r')
 json_data = json_file.read()
-json_object = json.loads(json_data)
+cluster_json_object = json.loads(json_data)
 
 # Parse cluster credentials
-cluster_address = json_object['cluster_address']
-port_number = json_object['port_number']
-username = json_object['username']
-password = json_object['password']
+cluster_address = cluster_json_object['cluster_address']
+port_number = cluster_json_object['port_number']
+username = cluster_json_object['username']
+password = cluster_json_object['password']
 
 # File filter configurations
-db_directory = json_object['main_directory']
-quarantine_directory = json_object['quarantine_directory']
-credentials_file = json_object['credentials_file']
+db_directory = cluster_json_object['main_directory']
+quarantine_directory = cluster_json_object['quarantine_directory']
+credentials_file = cluster_json_object['credentials_file']
 
 # Connect to the cluster
 rc = RestClient(cluster_address, port_number)
