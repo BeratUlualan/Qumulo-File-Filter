@@ -16,7 +16,7 @@ logging.basicConfig(filename='file_filter.log', level=logging.INFO,
     format='%(asctime)s,%(levelname)s,%(message)s')
 
 # Read credentials
-json_file = open('config/cluster_credentials.json','r')
+json_file = open('/Users/beratulualan/Downloads/Qumulo-File-Filter-main/Python/config/cluster_credentials.json','r')
 json_data = json_file.read()
 cluster_json_object = json.loads(json_data)
 
@@ -37,13 +37,13 @@ rc.login(username, password)
 logging.info('Connection established with {}'.format(cluster_address))
 
 # #Email Settings
-smtp_server = cluster_json_object['smtp_server']
-smtp_port = cluster_json_object['smtp_port']
-domain = cluster_json_object['domain']
-mail_server = smtplib.SMTP(smtp_server, int(smtp_port))
-mail_server.starttls()
-email_username = cluster_json_object['email_username']
-email_password = cluster_json_object['email_password']
+# smtp_server = cluster_json_object['smtp_server']
+# smtp_port = cluster_json_object['smtp_port']
+# domain = cluster_json_object['domain']
+# mail_server = smtplib.SMTP(smtp_server, int(smtp_port))
+# mail_server.starttls()
+# email_username = cluster_json_object['email_username']
+# email_password = cluster_json_object['email_password']
 #mail_server.login(email_username, email_password)
 
 c_json_file = open(credentials_file,'r')
@@ -70,49 +70,54 @@ def mail_send(username, new_file_path, email_subject, email_message):
     return ()
 
 def parse_file_extension(new_file_path):
-    new_filename, new_file_extension = os.path.splitext(new_file_path)
-    if "." + file_extension.lower() == new_file_extension.lower():
-        new_file_directory = pathlib.Path(new_file_path).parent.absolute()
-        excepted_directory_file = 0
-        for excepted_directory in exception_dir_path:
-            if str(new_file_directory).startswith(excepted_directory):
-                excepted_directory_file = 1
-            if excepted_directory_file == 0:
-                file_name_only = os.path.basename(new_file_path)
-                logging.info('A new file was found. File name: {}'.format(file_name_only))
-                new_file_directory_structure = str(new_file_directory).split('/')
-                directory_check = quarantine_directory
-                for n in range(len(new_file_directory_structure)):
-                    if new_file_directory_structure[n]:
-                        directory_check_1 = directory_check + "/" + str(new_file_directory_structure[n])
-                        try:
-                            file_id = rc.fs.get_file_attr(directory_check_1)['id']
-                        except qumulo.lib.request.RequestError:
-                            file_id = "null"
-                            rc.fs.create_directory(new_file_directory_structure[n], directory_check)
-                        directory_check = directory_check_1
-                # Copy
-                copy_time = datetime.datetime.now().strftime("%Y%m%d%H%M")
-                file_name_timestamp = file_name_only + "." + copy_time
-                rc.fs.create_file(file_name_timestamp, directory_check)
-                target_path = quarantine_directory + new_file_path + "." + copy_time
-                rc.fs.copy(source_path=new_file_path, target_path=target_path)
-                logging.info('{} file was copied to {}'.format(file_name_only, target_path))
-                file_acl = rc.fs.get_acl_v2(new_file_path)
-                rc.fs.set_acl_v2(file_acl, target_path)
+        new_filename, new_file_extension = os.path.splitext(new_file_path)
+        if "." + file_extension.lower() == new_file_extension.lower():
+            try:
+                new_file_id = rc.fs.get_file_attr(new_file_path)['id']
+                new_file_directory = pathlib.Path(new_file_path).parent.absolute()
+                excepted_directory_file = 0
+                for excepted_directory in exception_dir_path:
+                    if str(new_file_directory).startswith(excepted_directory):
+                        excepted_directory_file = 1
+                    if excepted_directory_file == 0:
+                        file_name_only = os.path.basename(new_file_path)
+                        logging.info('A new file was found. File name: {}'.format(file_name_only))
+                        new_file_directory_structure = str(new_file_directory).split('/')
+                        directory_check = quarantine_directory
+                        for n in range(len(new_file_directory_structure)):
+                            if new_file_directory_structure[n]:
+                                directory_check_1 = directory_check + "/" + str(new_file_directory_structure[n])
+                                try:
+                                    file_id = rc.fs.get_file_attr(directory_check_1)['id']
+                                except qumulo.lib.request.RequestError:
+                                    file_id = "null"
+                                    rc.fs.create_directory(new_file_directory_structure[n], directory_check)
+                                directory_check = directory_check_1
+                        # Copy
+                        copy_time = datetime.datetime.now().strftime("%Y%m%d%H%M")
+                        file_name_timestamp = file_name_only + "." + copy_time
+                        rc.fs.create_file(file_name_timestamp, directory_check)
+                        target_path = quarantine_directory + new_file_path + "." + copy_time
+                        rc.fs.copy(source_path=new_file_path, target_path=target_path)
+                        logging.info('{} file was copied to {}'.format(file_name_only, target_path))
+                        file_acl = rc.fs.get_acl_v2(new_file_path)
+                        rc.fs.set_acl_v2(file_acl, target_path)
 
-                owner_sid = rc.fs.get_file_attr(new_file_path)['owner_details']['id_value']
-                #username = rc.ad.sid_to_username_get(sid=owner_sid)
-                username = rc.auth.expand_identity(id_util.Identity(owner_sid))['id']['name'].split('\\',1)[1]
-                mail_send(username, new_file_path, email_subject, email_message)
+                        owner_sid = rc.fs.get_file_attr(new_file_path)['owner_details']['id_value']
+                        #username = rc.ad.sid_to_username_get(sid=owner_sid)
+                        #username = rc.auth.expand_identity(id_util.Identity(owner_sid))['id']['name'].split('\\',1)[1]
+                        # mail_send(username, new_file_path, email_subject, email_message)
 
-                rc.fs.delete(new_file_path)
-                logging.info('{} file was deleted'.format(new_file_path))
-            else:
-                logging.info(
-                    '{} file is in a excepted directory. This file won\'t be move to the quarantine directory.'.format(
-                        new_file_path))
-
+                        rc.fs.delete(new_file_path)
+                        logging.info('{} file was deleted'.format(new_file_path))
+                    else:
+                        logging.info(
+                            '{} file is in a excepted directory. This file won\'t be move to the quarantine directory.'.format(
+                                new_file_path))
+            except: 
+                        logging.info('{} file has already been deleted'.format(new_file_path))
+    
+            
 def snapshot_operations(policy_name):
     rc.snapshot.create_snapshot(policy_name, '', '2hours', directory_path)
     snapshots = rc.snapshot.list_snapshots()
@@ -139,7 +144,7 @@ media_file_list = []
 executable_file_list = []
 custom_file_list = []
 
-with open(os.path.join("config/file_types.json")) as type_file:
+with open(os.path.join("/Users/beratulualan/Downloads/Qumulo-File-Filter-main/Python/config/file_types.json")) as type_file:
     file_types = json.load(type_file)
     media_file_list = file_types['media_files']
     executable_file_list = file_types['executable_files']
