@@ -3,7 +3,7 @@
 This script can help Qumulo customer who wants to filter specific file types and move them a quarantine directory. It can also inform the file owner and Qumulo admins about this filtering operations via email.  
 
 ## Installation
-1. Copy **file_filter.py**, **file_types.json**,  **credentials.json**, and **cluster_credentials.json** files into a folder in a machine (Linux, MacOS, Windows) which has **Qumulo Python SDK**. If you haven't deployed it yet, please follow the additional steps section below. 
+1. Copy **file_filter.py**, **config**,  **policy_credentials.json**, and **cluster_credentials.json** files into a folder in a machine (Linux, MacOS, Windows) which has **Qumulo Python SDK**. If you haven't deployed it yet, please follow the additional steps section below. 
 2. Edit the **cluster_credentials.json**  file with your Qumulo cluster credentials. 
 ```sh
 {
@@ -11,6 +11,7 @@ This script can help Qumulo customer who wants to filter specific file types and
 	"port_number": 8000,
 	"username": "USERNAME",
 	"password": "PASSWORD",
+	"access_token": "ACCESS_TOKEN",
 	"main_directory": "/opt/Qumulo/",
 	"quarantine_directory": "/quarantine",
 	"credentials_file": "credentials.json",
@@ -25,7 +26,7 @@ If you need a username and password for e-mail settings, please append below par
 "email_username": "E-MAIL ADDRESS", 
 "email_password": "E-MAIL PASSWORD"
 ```
-3. Add a new policy for each top directory into the **credentials.json** file.
+3. Add a new policy for each top directory into the **policy_credentials.json** file.
 ```sh
 [{
 	"policy_name": "POLICY NAME",
@@ -47,7 +48,7 @@ If you need a username and password for e-mail settings, please append below par
 - If you want to filter the pre-defined media and executable files, please set `media_files` and `executable_files` definitions `true`. Otherwise, you can set them `false`
 - If you want to filter more file type, you can use `custom_file_types` definition for this purpose. You need to set `custom_files` definitions `true`. Otherwise, you can set it `false`
 
-4. Edit the **file_type.json** file which has the pre-defined media and executable file types. You can add new file media and executable files into this files. Other files can be defined in the **credentials.json** file as we mentioned above.
+4. Edit the **file_type.json** file inside the **config** directory which has the pre-defined media and executable file types. You can add new file media and executable files into this files. Other files can be defined in the **policy_credentials.json** file as we mentioned above.
 ```sh
 {
 	"media_files": ["mp1", "mp2", "mp3", "mp4", "mpa", "avi", "mov", "mpe", "mpeg", "mpg", "swf", "mid", "asx", "wma", "wmv"],
@@ -59,9 +60,9 @@ This script can help Qumulo customer who wants to filter specific file types and
 
 Qumulo API capabilities allow you to write your own automation until Qumulo announces native automation for this purpose. 
 
-**file_filter_py** script uses Qumulo's SnapDiff API (https://care.qumulo.com/hc/en-us/articles/360004815093-Snapshots-Identify-File-Changes-between-Snapshots) for identifying new created files and folders. This API call gives this list easily without any tree walk activity and also it can create a snapshot to protect files from any unwanted file movement activities. 
+**file_filter.py** script uses Qumulo's SnapDiff API (https://care.qumulo.com/hc/en-us/articles/360004815093-Snapshots-Identify-File-Changes-between-Snapshots) for identifying new created files and folders. This API call gives this list easily without any tree walk activity and also it can create a snapshot to protect files from any unwanted file movement activities. 
 
-You can change the duration period of the snapshots with editing below line in the **file_filter_py**.
+You can change the duration period of the snapshots with editing below line in the **file_filter.py**.
 
 ```rc.snapshot.create_snapshot(policy_name, '', '2hours', directory_path)``` 
 
@@ -97,9 +98,9 @@ new_files = value['new_files']
 			banned_formats.append(file_type)
 ....
 ```
-When the **file_filter_py** script find an unauthorized file type, it moves this file into `quarantine_directory` within the file/folder hierarchy with adding a timestamp to file name. This can allow the script to move the same file name again again.
+When the **file_filter.py** script find an unauthorized file type, it moves this file into `quarantine_directory` within the file/folder hierarchy with adding a timestamp to file name. This can allow the script to move the same file name again again.
 
-The **file_filter_py** script create a log file in main directory. If you want to create logs in another directory, please edit ```filename``` parameter as shown the line below. 
+The **file_filter.py** script create a log file in main directory. If you want to create logs in another directory, please edit ```filename``` parameter as shown the line below. 
 
 ```sh
 logging.basicConfig(filename='file_filter.log', level=logging.INFO,
@@ -120,59 +121,15 @@ The script doesn't delete the files under `quarantine_directory`. So you need to
 
 ## Additional Steps
 #### Qumulo Python SDK Installation 
-The Qumulo Python SDK has had support for Python 3.6+ since version 3.1.0.
-
-To install the Python 3.6 version of the Qumulo Python SDK, you can simply run the following command:
+To install the Python 3.10 version of the Qumulo Python SDK, you can simply run the following command:
 
 ```pip3 install qumulo_api==x.x.x```
 
 Replace "x.x.x" is the version of the SDK you wish to install. Qumulo recommends keeping the version of the SDK that you're using in sync with the version of your cluster.
 
-#### Encrypted Password Definitions
-You can use Fernet library to use encrypted password definitions in the json file rather than clear text. (https://cryptography.io/en/latest/fernet/)
-
-Fernet guarantees that a message encrypted using it cannot be manipulated or read without the key. Fernet is an implementation of symmetric (also known as “secret key”) authenticated cryptography. 
-
-This class provides both encryption and decryption facilities.
-```sh
->>> from cryptography.fernet import Fernet
->>> key = Fernet.generate_key()
->>> f = Fernet(key)
->>> token = f.encrypt(b"my deep dark secret")
->>> token
-b'...'
->>> f.decrypt(token)
-b'my deep dark secret'
-```
-You can create a **key.json** file like below to store your key for this operation.
-```{"key": "NkRz4hTFHw2otYf9xhIm41MkkjKPfQ1DaviQHkBNhAg="}```
-
-You can use Fernet as shown in lines below.
-```sh
-...
-import qumulo.lib.identity_util as id_util
-from cryptography.fernet import Fernet
-
 # Logging Details
 logging.basicConfig(filename='file_filter.log', level=logging.INFO,
     format='%(asctime)s,%(levelname)s,%(message)s')
-    
-# Decryption
-key_json_file = open('key.json', 'r')
-key_json_data = key_json_file.read()
-key_json_object = json.loads(key_json_data)
-fernet_key = key_json_object['key'].encode()
-fernet_decryption = Fernet(fernet_key)
-....
-....
-# Parse cluster credentials
-cluster_address = cluster_json_object['cluster_name']
-port_number = cluster_json_object['port_number']
-username = cluster_json_object['cluster_username']
-encrypted_cluster_password = cluster_json_object['cluster_password'].encode()
-password = fernet_decryption.decrypt(encrypted_cluster_password).decode("utf-8")
-....
-```
 
 
 
