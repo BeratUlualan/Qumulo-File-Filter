@@ -1,75 +1,106 @@
-import qumulo
+
 import datetime
 import json
 import os
 import logging
 import pathlib
-import json
 import smtplib
+import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from qumulo.rest_client import RestClient
-import qumulo.lib.identity_util as id_util
 
 # Logging Details
 logging.basicConfig(filename='file_filter.log', level=logging.INFO,
     format='%(asctime)s,%(levelname)s,%(message)s')
 
-# Read credentials
-json_file = open('/Users/beratulualan/Downloads/Qumulo-File-Filter-main/Python/config/cluster_credentials.json','r')
-json_data = json_file.read()
-cluster_json_object = json.loads(json_data)
+# Time settings for Snapshot creation
+t = datetime.datetime.now() + datetime.timedelta(hours=2)
+expiration_time = t.isoformat("T") +"Z"
 
-# Parse cluster credentials
-cluster_address = cluster_json_object['cluster_address']
-port_number = cluster_json_object['port_number']
-username = cluster_json_object['username']
-password = cluster_json_object['password']
+#  Qumulo Python libraries
+try:
+    import qumulo
+    from qumulo.rest_client import RestClient
+    from qumulo.lib.auth import Credentials
+    import qumulo.lib.identity_util as id_util
+except ImportError as error:
+    logging.error(
+        "Unable to import the required Qumulo api bindings. Please run the following command: pip3 install qumulo_api"
+    )
+    sys.exit()
+
+# Read credentials
+# Read and parse JSON credentials
+with open('cluster_credentials.json', 'r') as json_file:
+    cluster_credentials = json.load(json_file)
+
+
+# Function to initialize and return a RestClient object
+def initialize_rest_client(credentials):
+    if credentials['access_token']:
+        return RestClient(credentials['cluster_address'], credentials['port_number'], Credentials(credentials['access_token']))
+    elif credentials['username'] and credentials['password']:
+        client = RestClient(credentials['cluster_address'], credentials['port_number'])
+        client.login(credentials['username'], credentials['password'])
+        return client
+    else:
+        raise ValueError("Invalid credentials")
+
+# Read and parse JSON credentials
+with open('cluster_credentials.json', 'r') as json_file:
+    cluster_credentials = json.load(json_file)
+
+# Initialize RestClient and log connection
+try:
+    rc = initialize_rest_client(cluster_credentials)
+    logging.info(f"Connected to {cluster_credentials['cluster_address']}")
+except Exception as e:
+    logging.error(f"Connection failed: {e}")
+    sys.exit(1)
+
 
 # File filter configurations
-db_directory = cluster_json_object['main_directory']
-quarantine_directory = cluster_json_object['quarantine_directory']
-credentials_file = cluster_json_object['credentials_file']
+db_directory = cluster_credentials['main_directory']
+quarantine_directory = cluster_credentials['quarantine_directory']
+credentials_file = cluster_credentials['credentials_file']
 
-# Connect to the cluster
-rc = RestClient(cluster_address, port_number)
-rc.login(username, password)
-logging.info('Connection established with {}'.format(cluster_address))
 
-# #Email Settings
-# smtp_server = cluster_json_object['smtp_server']
-# smtp_port = cluster_json_object['smtp_port']
-# domain = cluster_json_object['domain']
+# # #Email Settings
+# smtp_server = cluster_credentials['smtp_server']
+# smtp_port = cluster_credentials['smtp_port']
+# domain = cluster_credentials['domain']
 # mail_server = smtplib.SMTP(smtp_server, int(smtp_port))
 # mail_server.starttls()
 # email_username = cluster_json_object['email_username']
 # email_password = cluster_json_object['email_password']
-#mail_server.login(email_username, email_password)
+# mail_server.login(email_username, email_password)
 
-c_json_file = open(credentials_file,'r')
-c_json_data = c_json_file.read()
-policy_json_object = json.loads(c_json_data)
 
-# Email Function for Sending Warning Message to The User Who Created a Banned File
-def mail_send(username, new_file_path, email_subject, email_message):
-    mail_msg = MIMEMultipart()
-    mail_msg['From'] = email_username
-    mail_msg['Subject'] = email_subject
-    mail_message = "<p>Dear " + username + ",</p><p>" + email_message + "</p>" + new_file_path
-    mail_msg.attach(MIMEText(mail_message, 'html'))
+# Read and parse JSON credentials
+with open('policy_credentials.json', 'r') as json_file:
+    policy_credentials = json.load(json_file)
 
-    if send_mail_user == True and send_mail_admin == True:
-        mail_msg['To'] = admin_email + ";" + username + "@" + domain
-        mail_server.send_message(mail_msg)
-    else:
-        if send_mail_admin == True :
-            mail_msg['To'] = admin_email
-            mail_server.send_message(mail_msg)
-        else:
-            pass
-    return ()
 
-def parse_file_extension(new_file_path):
+# # Email Function for Sending Warning Message to The User Who Created a Banned File
+# def mail_send(username, new_file_path, email_subject, email_message):
+#     mail_msg = MIMEMultipart()
+#     mail_msg['From'] = email_username
+#     mail_msg['Subject'] = email_subject
+#     mail_message = "<p>Dear " + username + ",</p><p>" + email_message + "</p>" + new_file_path
+#     mail_msg.attach(MIMEText(mail_message, 'html'))
+
+#     if send_mail_user == True and send_mail_admin == True:
+#         mail_msg['To'] = admin_email + ";" + username + "@" + domain
+#         mail_server.send_message(mail_msg)
+#     else:
+#         if send_mail_admin == True :
+#             mail_msg['To'] = admin_email
+#             mail_server.send_message(mail_msg)
+#         else:
+#             pass
+#     return ()
+
+def parse_file_extension(rc, new_file_path):
         new_filename, new_file_extension = os.path.splitext(new_file_path)
         if "." + file_extension.lower() == new_file_extension.lower():
             try:
@@ -118,15 +149,15 @@ def parse_file_extension(new_file_path):
                         logging.info('{} file has already been deleted'.format(new_file_path))
     
             
-def snapshot_operations(policy_name):
-    rc.snapshot.create_snapshot(policy_name, '', '2hours', directory_path)
+def snapshot_operations(rc,policy_name):
+    rc.snapshot.create_snapshot(name=policy_name, expiration=expiration_time, path=directory_path)
     snapshots = rc.snapshot.list_snapshots()
     snapshot_id_list = []
     sorted_snapshot_id_list = []
 
-    for individual_snapshot in snapshots['entries']:
-        if policy_name == individual_snapshot['name']:
-            snapshot_id_list.append(individual_snapshot['id'])
+    for snapshot in snapshots['entries']:
+        if snapshot['name'].endswith(policy_name):
+            snapshot_id_list.append(snapshot['id'])
     sorted_snapshot_id_list = sorted(snapshot_id_list)
 
     newer_snapshot_id = sorted_snapshot_id_list[-1]
@@ -144,59 +175,57 @@ media_file_list = []
 executable_file_list = []
 custom_file_list = []
 
-with open(os.path.join("/Users/beratulualan/Downloads/Qumulo-File-Filter-main/Python/config/file_types.json")) as type_file:
+with open(os.path.join("./config/file_types.json")) as type_file:
     file_types = json.load(type_file)
     media_file_list = file_types['media_files']
     executable_file_list = file_types['executable_files']
 
-for count, value in enumerate(policy_json_object):
-    directory_path = value['directory_path']
-    exception_dir_path = value['exception_dir_path']
-    policy_name = value['policy_name']
-    send_mail_admin = value['send_mail_admin']
-    admin_email = value['admin_email']
-    send_mail_user = value['send_mail_user']
-    email_subject = value['email_subject']
-    email_message = value['email_message']
+for policy in policy_credentials:
+    directory_path = policy['directory_path']
+    exception_dir_path = policy['exception_dir_path']
+    policy_name = policy['policy_name']
+    send_mail_admin = policy['send_mail_admin']
+    admin_email = policy['admin_email']
+    send_mail_user = policy['send_mail_user']
+    email_subject = policy['email_subject']
+    email_message = policy['email_message']
 
     banned_formats = []
-    media_files = value['media_files']
+    media_files = policy['media_files']
     if media_files:
         for file_type in media_file_list:
             banned_formats.append(file_type)
 
-    executable_files = value['executable_files']
+    executable_files = policy['executable_files']
     if executable_files:
         for file_type in executable_file_list:
             banned_formats.append(file_type)
 
-    custom_files = value['custom_files']
+    custom_files = policy['custom_files']
     if custom_files:
-        custom_file_list = value['custom_file_types']
+        custom_file_list = policy['custom_file_types']
         for file_type in custom_file_list:
             banned_formats.append(file_type)
 
-    created_files = snapshot_operations(policy_name)
-    if created_files['entries']:
-        logging.info('File extension scan job has started for {} directory'.format(directory_path))
-        for individual_file in created_files['entries']:
-            if individual_file['op'] == "CREATE":
-                new_file = individual_file['path']
+    delta_files = snapshot_operations(rc, policy_name)
+    if delta_files['entries']:
+        logging.info(f'File extension scan job has started for {directory_path} directory')
+        for file in delta_files['entries']:
+            if file['op'] == "CREATE":
+                new_file = file['path']
 
                 file_type = rc.fs.get_file_attr(new_file)['type']
                 if file_type == "FS_FILE_TYPE_DIRECTORY":
-                    logging.info('A new directory was found. Directory name: {}'.format(new_file))
+                    logging.info(f'A new directory was found. Directory name: {new_file}')
                     for file_extension in banned_formats:
                         for entry in rc.fs.tree_walk_preorder(new_file):
                             new_file_path = entry['path']
-                            parse_file_extension(new_file_path)
+                            parse_file_extension(rc, new_file_path)
                 elif file_type == "FS_FILE_TYPE_FILE":
                     for file_extension in banned_formats:
                         new_file_path = new_file
-                        parse_file_extension(new_file_path)
-                '''
-                else:
-                    logging.info(u'There is no new created file or directory under {}'. format(search_directory))
-                '''
-        else:
-            logging.info('There is no new created file or directory')
+                        parse_file_extension(rc, new_file_path)
+            else:
+                logging.info('There is no more new created file or directory')
+    else:
+        logging.info('There is no new created file or directory')

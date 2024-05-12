@@ -1,0 +1,117 @@
+2024-01-02 12:33:00,982,ERROR,Login error
+2024-01-02 12:35:00,463,INFO,Connection established with 10.220.150.10
+2024-01-02 12:35:00,984,INFO,Connection established with 10.220.150.10
+2024-01-02 12:35:34,062,INFO,Connection established with 10.220.150.10
+2024-01-02 12:35:34,563,INFO,Connection established with 10.220.150.10
+2024-01-02 12:36:45,336,INFO,Connection established with 10.220.150.10
+2024-01-02 12:36:45,839,INFO,Connection established with 10.220.150.10
+2024-01-02 12:38:30,252,INFO,Connection established with 10.220.150.10
+2024-01-02 12:38:30,769,INFO,Connection established with 10.220.150.10
+2024-01-02 12:55:26,696,ERROR,Connection failed: Invalid credentials
+2024-01-02 12:56:27,466,ERROR,Connection failed: list indices must be integers or slices, not str
+2024-01-02 12:57:36,197,INFO,Connected to 10.220.150.10
+2024-01-02 12:58:13,378,ERROR,Connection failed: list indices must be integers or slices, not str
+2024-01-02 12:58:43,725,INFO,Connected to 10.220.150.10
+2024-01-02 12:59:43,005,INFO,Connected to 10.220.150.10
+2024-01-02 13:00:07,665,INFO,Connected to 10.220.150.10
+2024-01-02 13:09:03,968,INFO,Connected to 10.220.150.10
+2024-01-02 13:09:04,478,ERROR,Connection failed: Error 401: unknown: Need to log in first to establish credentials.
+Backtrace:
+    (no backtrace)
+2024-01-02 13:10:00,098,INFO,Connected to 10.220.150.10
+2024-01-02 13:10:00,690,ERROR,Connection failed: Error 401: unknown: Need to log in first to establish credentials.
+Backtrace:
+    (no backtrace)
+2024-01-02 13:10:13,592,INFO,Connected to 10.220.150.10
+2024-01-02 13:10:14,096,ERROR,Connection failed: Error 401: unknown: Need to log in first to establish credentials.
+Backtrace:
+    (no backtrace)
+2024-01-02 13:10:20,079,INFO,Connected to 10.220.150.10
+2024-01-02 13:10:20,601,ERROR,Connection failed: Error 401: unknown: Need to log in first to establish credentials.
+Backtrace:
+    (no backtrace)
+2024-01-02 13:11:12,624,INFO,Connected to 10.220.150.10
+2024-01-02 13:11:13,144,ERROR,Connection failed: Error 401: unknown: Need to log in first to establish credentials.
+Backtrace:
+    (no backtrace)
+2024-01-02 13:12:16,928,ERROR,Connection failed: Error 401: http_unauthorized_error: Incorrect username or password
+Backtrace:
+    convert_authentication_error at api/session/session_impl.c:221
+    session_api_module_login_post at api/session/session_impl.c:290
+    _session_api_module_login_post at build/release/api/session/session.c:95
+    session_api_module_execute_request at build/release/api/session/session.c:565
+    execute_handler at api/api.c:284
+    dispatch_uri at api/api.c:337
+    api_dispatch_uri at api/api.c:369
+    pass_request_to_handler at protocols/http/server.c:686
+2024-01-02 13:12:36,611,INFO,Connected to 10.220.150.10
+2024-01-02 13:15:28,022,INFO,Connected to 10.220.150.10
+2024-01-02 13:16:15,548,INFO,Connected to 10.220.150.10
+2024-01-02 13:17:09,559,INFO,Connected to 10.220.150.10
+2024-01-02 13:17:27,931,INFO,Connected to 10.220.150.10
+2024-01-02 13:17:29,286,INFO,A new snapshot was created. snapshot ID is 3855 for /berat
+2024-01-02 13:17:29,857,INFO,New files were listed with Qumulo SnapDiff API for 3855 - 3854
+2024-01-02 13:18:33,126,INFO,Connected to 10.220.150.10
+2024-01-02 13:18:34,490,INFO,A new snapshot was created. snapshot ID is 3856 for /berat
+2024-01-02 13:18:34,656,INFO,New files were listed with Qumulo SnapDiff API for 3856 - 3855
+2024-01-02 13:18:34,657,INFO,File extension scan job has started for /berat directory
+2024-01-02 13:20:58,831,INFO,Connected to 10.220.150.10
+2024-01-02 13:21:00,204,INFO,A new snapshot was created. snapshot ID is 3857 for /berat
+2024-01-02 13:21:00,372,INFO,New files were listed with Qumulo SnapDiff API for 3857 - 3855
+2024-01-02 13:21:00,372,INFO,File extension scan job has started for /berat directory
+2024-01-02 13:21:00,707,INFO,A new file was found. File name: 1226899_pastedImage_2.png
+2024-01-02 13:21:01,646,INFO,1226899_pastedImage_2.png file was copied to /quarantine/berat/1226899_pastedImage_2.png.202401021321
+2024-01-02 13:21:02,335,INFO,/berat/1226899_pastedImage_2.png file was deleted
+2024-01-02 13:21:02,336,INFO,There is no new created file or directory
+2024-01-02 13:22:09,228,INFO,Connected to 10.220.150.10
+2024-01-02 13:22:10,571,INFO,A new snapshot was created. snapshot ID is 3858 for /berat
+2024-01-02 13:22:10,737,INFO,New files were listed with Qumulo SnapDiff API for 3858 - 3857
+2024-01-02 13:22:10,738,INFO,File extension scan job has started for /berat directory
+2024-01-02 13:22:10,905,INFO,There is no more new created file or directory
+2024-01-02 13:25:00,246,INFO,Connected to 10.220.150.10
+2024-01-02 13:25:01,593,INFO,A new snapshot was created. snapshot ID is 3859 for /berat
+2024-01-02 13:25:01,758,INFO,New files were listed with Qumulo SnapDiff API for 3859 - 3857
+2024-01-02 13:25:01,758,INFO,File extension scan job has started for /berat directory
+2024-01-02 13:25:01,759,INFO,There is no new created file or directory
+2024-01-02 13:25:02,087,INFO,A new file was found. File name: 1226899_pastedImage_2.png
+2024-01-02 13:25:02,612,INFO,1226899_pastedImage_2.png file was copied to /quarantine/berat/1226899_pastedImage_2.png.202401021325
+2024-01-02 13:25:03,291,INFO,/berat/1226899_pastedImage_2.png file was deleted
+2024-01-02 13:25:03,292,INFO,There is no new created file or directory
+2024-01-02 13:26:10,706,INFO,Connected to 10.220.150.10
+2024-01-02 13:26:12,052,INFO,A new snapshot was created. snapshot ID is 3860 for /berat
+2024-01-02 13:26:12,623,INFO,New files were listed with Qumulo SnapDiff API for 3860 - 3859
+2024-01-02 13:26:12,623,INFO,File extension scan job has started for /berat directory
+2024-01-02 13:26:12,624,INFO,There is no more new created file or directory
+2024-01-02 13:26:12,624,INFO,There is no more new created file or directory
+2024-01-02 13:27:11,838,INFO,Connected to 10.220.150.10
+2024-01-02 13:27:13,195,INFO,A new snapshot was created. snapshot ID is 3861 for /berat
+2024-01-02 13:27:13,364,INFO,New files were listed with Qumulo SnapDiff API for 3861 - 3860
+2024-01-02 13:27:13,365,INFO,File extension scan job has started for /berat directory
+2024-01-02 13:27:13,704,INFO,A new directory was found. Directory name: /berat/untitled folder/
+2024-01-02 13:27:31,246,INFO,A new file was found. File name: 1226899_pastedImage_2.png
+2024-01-02 13:27:32,117,INFO,1226899_pastedImage_2.png file was copied to /quarantine/berat/untitled folder/1226899_pastedImage_2.png.202401021327
+2024-01-02 13:27:32,795,INFO,/berat/untitled folder/1226899_pastedImage_2.png file was deleted
+2024-01-02 13:27:32,795,INFO,There is no more new created file or directory
+2024-05-12 20:49:58,266,INFO,Connection established with 10.220.150.10
+2024-05-12 20:49:59,075,INFO,Connection established with 10.220.150.10
+2024-05-12 20:50:15,548,INFO,Connected to 10.220.150.10
+2024-05-12 20:50:18,517,INFO,A new snapshot was created. snapshot ID is 4017 for /berat
+2024-05-12 20:53:34,800,INFO,Connected to 10.220.150.10
+2024-05-12 20:53:39,454,INFO,A new snapshot was created. snapshot ID is 4019 for /berat
+2024-05-12 20:53:39,790,INFO,New files were listed with Qumulo SnapDiff API for 4019 - 4017
+2024-05-12 20:53:39,791,INFO,File extension scan job has started for /berat directory
+2024-05-12 20:53:40,326,INFO,A new file was found. File name: berat.mp3
+2024-05-12 20:53:41,155,INFO,berat.mp3 file was copied to /quarantine/berat/berat.mp3.202405122053
+2024-05-12 20:53:42,543,INFO,/berat/berat.mp3 file was deleted
+2024-05-12 20:53:42,545,INFO,There is no more new created file or directory
+2024-05-12 20:54:16,515,INFO,Connected to 10.220.150.10
+2024-05-12 20:54:18,844,INFO,A new snapshot was created. snapshot ID is 4021 for /berat
+2024-05-12 20:54:19,105,INFO,New files were listed with Qumulo SnapDiff API for 4021 - 4019
+2024-05-12 20:54:19,106,INFO,File extension scan job has started for /berat directory
+2024-05-12 20:54:19,106,INFO,There is no more new created file or directory
+2024-05-12 20:54:19,106,INFO,There is no more new created file or directory
+2024-05-12 20:55:17,903,INFO,Connected to 10.220.150.10
+2024-05-12 20:55:22,220,INFO,A new snapshot was created. snapshot ID is 4023 for /berat
+2024-05-12 20:55:22,469,INFO,New files were listed with Qumulo SnapDiff API for 4023 - 4021
+2024-05-12 20:55:22,469,INFO,File extension scan job has started for /berat directory
+2024-05-12 20:55:22,719,INFO,There is no more new created file or directory
