@@ -1,4 +1,0 @@
-{
-	"media_files": ["mp1", "mp2", "mp3", "mp4", "mpa", "avi", "mov", "mpe", "mpeg", "mpg", "swf", "mid", "asx", "wma", "wmv"],
-	"executable_files": ["wim", "zoo", "sit", "eml", "msg", "oft", "ost", "pst", "bat", "cmd", "com", "exe", "inf", "js", "msi", "msp", "ocx", "ps1", "vb", "vbs", "wsf", "wsh", "jse", "acm", "dll", "ocx", "sys", "vxd", "asp", "aspx", "css", "dhtml", "php"]
-}
